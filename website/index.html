@@ -1,0 +1,3658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XtMacros</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #05050b;
+      --text: #ffffff;
+      --muted: rgba(255, 255, 255, 0.62);
+      --muted-2: rgba(255, 255, 255, 0.42);
+      --accent: #858cff;
+      --accent-2: #b3b7ff;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -4;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(91, 95, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 78% 18%, rgba(117, 123, 255, 0.07), transparent 26%),
+        radial-gradient(circle at 55% 80%, rgba(67, 72, 160, 0.10), transparent 34%),
+        linear-gradient(180deg, #060611 0%, #040409 100%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+    }
+
+    #network {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.28;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 44px));
+      margin: 0 auto;
+    }
+
+    nav {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1180px, calc(100% - 44px));
+      height: 76px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px 0 22px;
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      border-radius: 24px;
+      background: rgba(8, 8, 18, 0.76);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: white;
+    }
+
+    .brand-text {
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: -0.7px;
+    }
+
+    .links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      margin-left: 40px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.055);
+    }
+
+    .links a {
+      color: rgba(255, 255, 255, 0.64);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 13px;
+      transition: 0.22s ease;
+    }
+
+    .links a:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .nav-action {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 750;
+      padding: 13px 17px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #7078ff, #9aa0ff);
+      box-shadow: 0 14px 42px rgba(112, 120, 255, 0.32);
+      transition: 0.22s ease;
+    }
+
+    .nav-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 58px rgba(112, 120, 255, 0.42);
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      align-items: center;
+      gap: 42px;
+      padding-top: 110px;
+    }
+
+    h1 {
+      max-width: 760px;
+      font-size: clamp(48px, 7vw, 92px);
+      line-height: 0.92;
+      letter-spacing: -5px;
+      margin-bottom: 24px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(180deg, #ffffff 0%, #d9dcff 42%, #969cd4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 640px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.75;
+      margin-bottom: 34px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 38px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 20px;
+      border-radius: 17px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 800;
+      transition: 0.22s ease;
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow: 0 18px 54px rgba(112, 120, 255, 0.35);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 24px 72px rgba(112, 120, 255, 0.48);
+    }
+
+    .btn.ghost {
+      color: rgba(255, 255, 255, 0.86);
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .btn.ghost:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      width: 152px;
+      padding: 15px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.20);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      letter-spacing: -1px;
+      margin-bottom: 3px;
+    }
+
+    .stat span {
+      color: var(--muted-2);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .hero-panel {
+      position: relative;
+      min-height: 520px;
+      border-radius: 34px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      z-index: -1;
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 25% 20%, rgba(135, 143, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 76%, rgba(82, 89, 220, 0.14), transparent 34%);
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+        .display-preview {
+      width: 118%;
+      max-width: none;
+      height: auto;
+      display: block;
+      border-radius: 10px;
+      object-fit: contain;
+      filter: drop-shadow(0 32px 80px rgba(0, 0, 0, 0.55));
+      transition: transform 0.28s ease, filter 0.28s ease;
+    }
+
+    .display-preview:hover {
+      transform: translateY(-10px) scale(1.025);
+      filter: drop-shadow(0 42px 100px rgba(120, 128, 255, 0.28))
+              drop-shadow(0 32px 80px rgba(0, 0, 0, 0.62));
+    }
+
+    .section {
+      padding: 80px 0;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin: 0 auto 34px;
+      text-align: center;
+    }
+
+    .section-head h2 {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1;
+      letter-spacing: -2.6px;
+      margin-bottom: 16px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 17px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 252px;
+      padding: 24px;
+      border-radius: 28px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.028)),
+        rgba(11, 11, 20, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
+      transition: 0.22s ease;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      opacity: 0;
+      background: radial-gradient(circle at 20% 0%, rgba(129, 137, 255, 0.26), transparent 38%);
+      transition: 0.22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-7px);
+      border-color: rgba(139, 146, 255, 0.28);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-number {
+      position: relative;
+      z-index: 1;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 28px;
+      border-radius: 16px;
+      color: #dce0ff;
+      font-size: 13px;
+      font-weight: 900;
+      background: rgba(124, 132, 255, 0.13);
+      border: 1px solid rgba(147, 153, 255, 0.24);
+    }
+
+    .card h3 {
+      position: relative;
+      z-index: 1;
+      font-size: 23px;
+      letter-spacing: -0.8px;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      line-height: 1.68;
+      font-size: 15px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .large-panel {
+      border-radius: 32px;
+      padding: 30px;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(128, 136, 255, 0.18), transparent 34%),
+        rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      box-shadow: 0 26px 80px rgba(0, 0, 0, 0.30);
+    }
+
+    .large-panel h2 {
+      font-size: clamp(32px, 4vw, 52px);
+      line-height: 1;
+      letter-spacing: -2.3px;
+      margin-bottom: 17px;
+    }
+
+    .large-panel p {
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+
+    .feature-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 23px;
+      background: rgba(255, 255, 255, 0.042);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+    }
+
+    .check {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      border-radius: 10px;
+      background: rgba(126, 134, 255, 0.16);
+      border: 1px solid rgba(145, 151, 255, 0.26);
+      position: relative;
+    }
+
+    .check::after {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 5px;
+      left: 8px;
+      top: 9px;
+      border-left: 2px solid #d6d9ff;
+      border-bottom: 2px solid #d6d9ff;
+      transform: rotate(-45deg);
+    }
+
+    .feature-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .feature-item span {
+      color: var(--muted-2);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .pricing {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .price-card {
+      padding: 26px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    .price-card.featured {
+      background:
+        radial-gradient(circle at top, rgba(130, 138, 255, 0.21), transparent 48%),
+        rgba(255, 255, 255, 0.06);
+      border-color: rgba(149, 155, 255, 0.32);
+    }
+
+    .price-card h3 {
+      font-size: 22px;
+      letter-spacing: -0.8px;
+      margin-bottom: 8px;
+    }
+
+    .price-card p {
+      color: var(--muted-2);
+      line-height: 1.6;
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .price {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 22px;
+    }
+
+    .price span {
+      color: var(--muted-2);
+      font-size: 14px;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+
+    .wide-btn {
+      width: 100%;
+    }
+
+    footer {
+      padding: 36px 0 46px;
+      color: rgba(255, 255, 255, 0.42);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .nav-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 14px;
+      font-weight: 850;
+      padding: 12px 16px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      cursor: pointer;
+      transition: 0.22s ease;
+      font-family: inherit;
+    }
+
+    .cart-btn:hover {
+      color: #ffffff;
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .cart-btn span {
+      min-width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      padding: 0 6px;
+      border-radius: 999px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 950;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+    }
+
+    .ticket-btn {
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 14px;
+      font-weight: 850;
+      padding: 12px 16px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      cursor: pointer;
+      transition:
+        transform 0.22s ease,
+        background 0.22s ease,
+        color 0.22s ease;
+      font-family: inherit;
+    }
+
+    .ticket-btn:hover {
+      color: #ffffff;
+      transform: translateY(-2px) scale(1.03);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .ticket-btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .auth-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .login-btn,
+    .signup-btn,
+    .auth-submit,
+    .auth-switch,
+    .logout-btn {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .login-btn {
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 14px;
+      font-weight: 800;
+      padding: 12px 16px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      transition:
+        transform 0.22s ease,
+        background 0.22s ease,
+        color 0.22s ease;
+    }
+
+    .signup-btn,
+    .logout-btn {
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 850;
+      padding: 12px 17px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow: 0 14px 42px rgba(112, 120, 255, 0.32);
+      transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+    }
+
+    .login-btn:hover {
+      color: #ffffff;
+      transform: translateY(-2px) scale(1.03);
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .signup-btn:hover,
+    .logout-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 18px 58px rgba(112, 120, 255, 0.42);
+    }
+
+    .login-btn:active,
+    .signup-btn:active,
+    .logout-btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .auth-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(112, 120, 255, 0), transparent 34%),
+        rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0);
+      transition:
+        opacity 0.28s ease,
+        background 0.28s ease,
+        backdrop-filter 0.28s ease;
+    }
+
+    .auth-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(112, 120, 255, 0.18), transparent 34%),
+        rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-box {
+      position: relative;
+      width: min(440px, 100%);
+      padding: 30px;
+      border-radius: 32px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(132, 140, 255, 0.22), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,0.095), rgba(255,255,255,0.035)),
+        rgba(9, 9, 18, 0.94);
+      border: 1px solid rgba(153, 160, 255, 0.18);
+      box-shadow:
+        0 34px 110px rgba(0, 0, 0, 0.58),
+        0 0 70px rgba(112, 120, 255, 0.16);
+      transform: translateY(18px) scale(0.96);
+      opacity: 0;
+      transition:
+        transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.28s ease;
+    }
+
+    .auth-modal.active .auth-box {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .auth-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 80%);
+    }
+
+    .auth-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .auth-top h2 {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -1.7px;
+    }
+
+    .auth-subtitle {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: -12px 0 22px;
+    }
+
+    .auth-close {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      color: rgba(255, 255, 255, 0.86);
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.075);
+      transition: 0.22s ease;
+      font-family: inherit;
+    }
+
+    .auth-close span {
+      display: block;
+      transform: translateY(-1px);
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 800;
+      transition: 0.22s ease;
+    }
+
+    .auth-close:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .auth-close:hover span {
+      transform: translateY(-1px);
+    }
+
+    .auth-form {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 13px;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .auth-field label {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .auth-form input {
+      width: 100%;
+      height: 54px;
+      padding: 0 16px;
+      border-radius: 17px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.105);
+      transition: 0.22s ease;
+    }
+
+    .auth-form input::placeholder {
+      color: rgba(255, 255, 255, 0.34);
+    }
+
+    .auth-form input:focus {
+      background: rgba(255, 255, 255, 0.075);
+      border-color: rgba(143, 150, 255, 0.72);
+      box-shadow: 0 0 0 4px rgba(112, 120, 255, 0.14);
+    }
+
+    .auth-submit {
+      height: 56px;
+      margin-top: 4px;
+      border-radius: 18px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 950;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow:
+        0 18px 54px rgba(112, 120, 255, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      transition: 0.22s ease;
+    }
+
+    .auth-submit:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 24px 70px rgba(112, 120, 255, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .auth-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-note {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .auth-switch {
+      color: #bfc3ff;
+      background: transparent;
+      font-weight: 900;
+      transition: 0.2s ease;
+    }
+
+    .auth-switch:hover {
+      color: #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .auth-message {
+      position: relative;
+      z-index: 1;
+      min-height: 22px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .auth-message.error {
+      color: #ff9d9d;
+    }
+
+    .auth-message.success {
+      color: #a9ffcf;
+    }
+
+    .video-preview-wrap {
+      width: min(980px, 100%);
+      margin: 34px auto 0;
+      padding: 12px;
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)),
+        rgba(11, 11, 20, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      box-shadow: 0 26px 80px rgba(0, 0, 0, 0.32);
+      overflow: hidden;
+    }
+
+    .video-preview-local {
+      width: 100%;
+      height: 520px;
+      display: block;
+      border: 0;
+      border-radius: 22px;
+      object-fit: cover;
+      background: #000;
+    }
+
+        .faq-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .faq-item {
+      padding: 24px;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.028)),
+        rgba(11, 11, 20, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
+    }
+
+    .faq-item h3 {
+      font-size: 20px;
+      letter-spacing: -0.6px;
+      margin-bottom: 10px;
+    }
+
+    .faq-item p {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .price-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .price-title-row h3 {
+      margin-bottom: 0;
+    }
+
+    .recommended-badge {
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow: 0 12px 32px rgba(112, 120, 255, 0.32);
+    }
+
+        .add-cart-btn {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .cart-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 998;
+      display: flex;
+      justify-content: flex-end;
+      background: rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0);
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        opacity 0.28s ease,
+        background 0.28s ease,
+        backdrop-filter 0.28s ease;
+    }
+
+    .cart-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(14px);
+    }
+
+    .cart-panel {
+      width: min(430px, 100%);
+      height: 100%;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(132, 140, 255, 0.20), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035)),
+        rgba(9, 9, 18, 0.96);
+      border-left: 1px solid rgba(153, 160, 255, 0.18);
+      box-shadow: -30px 0 90px rgba(0, 0, 0, 0.42);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cart-modal.active .cart-panel {
+      transform: translateX(0);
+    }
+
+    .cart-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .cart-top h2 {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -1.6px;
+      margin-bottom: 8px;
+    }
+
+    .cart-top p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .cart-close {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      color: rgba(255, 255, 255, 0.86);
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.075);
+      transition: 0.22s ease;
+      font-family: inherit;
+    }
+
+    .cart-close span {
+      display: block;
+      transform: translateY(-1px);
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 800;
+      transition: 0.22s ease;
+    }
+
+    .cart-close:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .cart-close:hover span {
+      transform: translateY(-1px);
+    }
+    .cart-items {
+      flex: 1;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .cart-empty {
+      padding: 22px;
+      border-radius: 22px;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.095);
+    }
+
+    .cart-item h3 {
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      margin-bottom: 5px;
+    }
+
+    .cart-item p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .cart-remove {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 12px;
+      color: rgba(255, 255, 255, 0.78);
+      background: rgba(255, 255, 255, 0.075);
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 900;
+      transition: 0.2s ease;
+      font-family: inherit;
+    }
+
+    .cart-remove:hover {
+      color: #ffffff;
+      background: rgba(255, 110, 110, 0.18);
+    }
+
+    .cart-bottom {
+      display: grid;
+      gap: 14px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.085);
+    }
+
+    .cart-total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .cart-total-row strong {
+      color: #ffffff;
+      font-size: 28px;
+      letter-spacing: -1px;
+    }
+
+    .checkout-btn {
+      height: 56px;
+      border: 0;
+      border-radius: 18px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 950;
+      cursor: pointer;
+      font-family: inherit;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow: 0 18px 54px rgba(112, 120, 255, 0.38);
+      transition: 0.22s ease;
+    }
+
+    .checkout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 70px rgba(112, 120, 255, 0.48);
+    }
+
+    .ticket-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(112, 120, 255, 0), transparent 34%),
+        rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0);
+      transition:
+        opacity 0.28s ease,
+        background 0.28s ease,
+        backdrop-filter 0.28s ease;
+    }
+
+    .ticket-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(112, 120, 255, 0.18), transparent 34%),
+        rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .ticket-box {
+      position: relative;
+      width: min(500px, 100%);
+      padding: 30px;
+      border-radius: 32px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(132, 140, 255, 0.22), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,0.095), rgba(255,255,255,0.035)),
+        rgba(9, 9, 18, 0.94);
+      border: 1px solid rgba(153, 160, 255, 0.18);
+      box-shadow:
+        0 34px 110px rgba(0, 0, 0, 0.58),
+        0 0 70px rgba(112, 120, 255, 0.16);
+      transform: translateY(18px) scale(0.96);
+      opacity: 0;
+      transition:
+        transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.28s ease;
+    }
+
+    .ticket-box-wide {
+      width: min(980px, 100%);
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ticket-box-user {
+      width: min(520px, 100%);
+    }
+
+    .ticket-box-user .ticket-layout {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+
+    .ticket-box-user .ticket-sidebar {
+      display: none !important;
+    }
+
+    .ticket-box-user .ticket-chat {
+      min-height: 280px;
+      max-height: 330px;
+    }
+
+    .ticket-box-user .ticket-bubble {
+      max-width: 88%;
+    }
+
+    .ticket-modal.active .ticket-box {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .ticket-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 80%);
+    }
+
+    .ticket-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .ticket-top h2 {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -1.7px;
+      margin-bottom: 8px;
+    }
+
+    .ticket-top p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .ticket-close {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      color: rgba(255, 255, 255, 0.86);
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.075);
+      transition: 0.22s ease;
+      font-family: inherit;
+    }
+
+    .ticket-close span {
+      display: block;
+      transform: translateY(-1px);
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .ticket-close:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .ticket-layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 16px;
+      min-height: 520px;
+      overflow: hidden;
+    }
+
+    .ticket-sidebar {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      overflow: hidden;
+    }
+
+    .ticket-sidebar-title {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .ticket-list {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .ticket-list-btn {
+      width: 100%;
+      padding: 13px;
+      border: 0;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.78);
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.055);
+      transition: 0.2s ease;
+    }
+
+    .ticket-list-btn:hover,
+    .ticket-list-btn.active {
+      color: #ffffff;
+      background: rgba(126, 134, 255, 0.18);
+    }
+
+    .ticket-list-btn strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .ticket-list-btn span {
+      color: var(--muted-2);
+      font-size: 12px;
+    }
+
+    .ticket-empty-small {
+      padding: 14px;
+      border-radius: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .ticket-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ticket-form {
+      display: grid;
+      gap: 13px;
+    }
+
+    .ticket-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .ticket-field label {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .ticket-field input,
+    .ticket-field textarea {
+      width: 100%;
+      padding: 0 16px;
+      border-radius: 17px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.105);
+      transition: 0.22s ease;
+      font-family: inherit;
+    }
+
+    .ticket-field input {
+      height: 54px;
+    }
+
+    .ticket-field textarea {
+      height: 132px;
+      padding-top: 15px;
+      resize: none;
+    }
+
+    .ticket-field input::placeholder,
+    .ticket-field textarea::placeholder {
+      color: rgba(255, 255, 255, 0.34);
+    }
+
+    .ticket-field input:focus,
+    .ticket-field textarea:focus,
+    .ticket-reply-form input:focus {
+      background: rgba(255, 255, 255, 0.075);
+      border-color: rgba(143, 150, 255, 0.72);
+      box-shadow: 0 0 0 4px rgba(112, 120, 255, 0.14);
+    }
+
+    .ticket-submit,
+    .ticket-reply-form button,
+    .ticket-close-current {
+      height: 52px;
+      border: 0;
+      border-radius: 17px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 950;
+      cursor: pointer;
+      font-family: inherit;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow: 0 18px 54px rgba(112, 120, 255, 0.32);
+      transition: 0.22s ease;
+    }
+
+    .ticket-submit:hover,
+    .ticket-reply-form button:hover,
+    .ticket-close-current:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 70px rgba(112, 120, 255, 0.44);
+    }
+
+    .ticket-submit:disabled,
+    .ticket-reply-form button:disabled,
+    .ticket-close-current:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .ticket-chat {
+      flex: 1;
+      display: none;
+      align-content: start;
+      gap: 10px;
+      min-height: 330px;
+      max-height: 390px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 14px;
+      padding-right: 10px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(143, 150, 255, 0.58) rgba(255, 255, 255, 0.045);
+    }
+
+    .ticket-chat::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .ticket-chat::-webkit-scrollbar-track {
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .ticket-chat::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: linear-gradient(180deg, #6d76ff, #a2a8ff);
+      border: 2px solid rgba(15, 15, 28, 0.95);
+    }
+
+    .ticket-chat::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #8a91ff, #c0c4ff);
+    }
+
+    .ticket-chat.active {
+      display: grid;
+    }
+
+    .ticket-chat-empty {
+      color: var(--muted);
+      text-align: center;
+      align-self: center;
+      padding: 30px;
+    }
+
+    .ticket-bubble {
+      width: fit-content;
+      max-width: min(420px, 82%);
+      padding: 12px 14px;
+      border-radius: 18px;
+      color: rgba(255, 255, 255, 0.86);
+      background: rgba(255, 255, 255, 0.075);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+    }
+
+    .ticket-bubble.mine {
+      justify-self: end;
+      background: rgba(126, 134, 255, 0.20);
+      border-color: rgba(153, 160, 255, 0.18);
+    }
+
+    .ticket-bubble.admin {
+      background: rgba(255, 255, 255, 0.085);
+    }
+
+    .ticket-bubble.bot {
+      justify-self: start;
+      max-width: min(520px, 92%);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(132, 140, 255, 0.22), transparent 42%),
+        rgba(255, 255, 255, 0.075);
+      border-color: rgba(153, 160, 255, 0.22);
+      box-shadow: 0 14px 44px rgba(112, 120, 255, 0.12);
+    }
+
+    .ticket-bubble.bot p {
+      line-height: 1.65;
+    }
+
+    .ticket-bubble p {
+      font-size: 14px;
+      line-height: 1.45;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    .ticket-bubble span {
+      color: rgba(255, 255, 255, 0.42);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ticket-image {
+      width: min(280px, 100%);
+      display: block;
+      margin-bottom: 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+      cursor: pointer;
+    }
+
+    .ticket-image:hover {
+      filter: brightness(1.08);
+    }
+
+    .ticket-upload-btn {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 17px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 22px;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.075);
+      border: 1px solid rgba(255, 255, 255, 0.105);
+      transition: 0.22s ease;
+    }
+
+    .ticket-upload-btn:hover {
+      color: #ffffff;
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .ticket-file-input {
+      display: none;
+    }
+
+    .ticket-reply-form {
+      display: none;
+      grid-template-columns: 52px 1fr 110px;
+      gap: 10px;
+    }
+
+    .ticket-reply-form.active {
+      display: grid;
+    }
+
+    .ticket-reply-form input {
+      height: 52px;
+      padding: 0 16px;
+      border-radius: 17px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.105);
+      font-family: inherit;
+    }
+
+    .ticket-close-current {
+      display: none;
+      background: rgba(255, 110, 110, 0.18);
+      box-shadow: none;
+      border: 1px solid rgba(255, 110, 110, 0.22);
+    }
+
+    .ticket-close-current.active {
+      display: block;
+    }
+
+    .ticket-message {
+      min-height: 22px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .ticket-message.error {
+      color: #ff9d9d;
+    }
+
+    .ticket-message.success {
+      color: #a9ffcf;
+    }
+
+        .checkout-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(112, 120, 255, 0), transparent 34%),
+        rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0);
+      transition:
+        opacity 0.28s ease,
+        background 0.28s ease,
+        backdrop-filter 0.28s ease;
+    }
+
+    .checkout-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(112, 120, 255, 0.18), transparent 34%),
+        rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .checkout-box {
+      width: min(440px, 100%);
+      padding: 28px;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(132, 140, 255, 0.22), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,0.095), rgba(255,255,255,0.035)),
+        rgba(9, 9, 18, 0.96);
+      border: 1px solid rgba(153, 160, 255, 0.18);
+      box-shadow:
+        0 34px 110px rgba(0, 0, 0, 0.58),
+        0 0 70px rgba(112, 120, 255, 0.16);
+      transform: translateY(18px) scale(0.96);
+      opacity: 0;
+      transition:
+        transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.28s ease;
+    }
+
+    .checkout-modal.active .checkout-box {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .checkout-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .checkout-top h2 {
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -1.6px;
+      margin-bottom: 8px;
+    }
+
+    .checkout-top p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .checkout-close {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      color: rgba(255, 255, 255, 0.86);
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.075);
+      transition: 0.22s ease;
+      font-family: inherit;
+    }
+
+    .checkout-close span {
+      display: block;
+      transform: translateY(-1px);
+      font-size: 22px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .checkout-close:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .checkout-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      margin-bottom: 14px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(132, 140, 255, 0.18), transparent 46%),
+        rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(153, 160, 255, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .checkout-summary span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    .checkout-summary small {
+      display: block;
+      color: rgba(255, 255, 255, 0.44);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .checkout-summary strong {
+      color: #ffffff;
+      font-size: 34px;
+      letter-spacing: -1.5px;
+    }
+
+    .checkout-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .checkout-stat {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      text-align: center;
+    }
+
+    .checkout-stat strong {
+      display: block;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 950;
+      margin-bottom: 4px;
+    }
+
+    .checkout-stat span {
+      display: block;
+      color: rgba(255, 255, 255, 0.42);
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.35;
+    }
+
+    .checkout-info-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px;
+      margin-bottom: 14px;
+      border-radius: 18px;
+      background: rgba(112, 120, 255, 0.09);
+      border: 1px solid rgba(153, 160, 255, 0.14);
+    }
+
+    .checkout-info-dot {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 10px;
+      margin-top: 5px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #6d76ff, #a2a8ff);
+      box-shadow: 0 0 22px rgba(112, 120, 255, 0.7);
+    }
+
+    .checkout-info-card p {
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.55;
+    }
+
+    .checkout-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .checkout-method {
+      position: relative;
+      height: 112px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      border: 0;
+      border-radius: 22px;
+      color: #ffffff;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+      overflow: hidden;
+      transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+    }
+
+    .payment-image-btn {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.14), transparent 42%),
+        rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow:
+        0 18px 54px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .payment-image-btn:hover {
+      transform: translateY(-3px) scale(1.025);
+      border-color: rgba(153, 160, 255, 0.34);
+      box-shadow:
+        0 24px 70px rgba(112, 120, 255, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .payment-image-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .payment-image-btn img {
+      width: 120%;
+      height: 96px;
+      display: block;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.28));
+    }
+
+    .payment-image-btn.paypal {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(72, 112, 255, 0.22), transparent 44%),
+        rgba(255, 255, 255, 0.055);
+    }
+
+    .payment-image-btn.cashapp {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(36, 220, 95, 0.18), transparent 44%),
+        rgba(255, 255, 255, 0.055);
+    }
+
+    .checkout-method:hover {
+      transform: translateY(-2px);
+    }
+
+    .checkout-method.paypal {
+      background: linear-gradient(135deg, #4d6bff, #8b9bff);
+      box-shadow: 0 18px 54px rgba(77, 107, 255, 0.30);
+    }
+
+    .checkout-method.cashapp {
+      background: linear-gradient(135deg, #22b455, #59e28a);
+      box-shadow: 0 18px 54px rgba(34, 180, 85, 0.24);
+    }
+
+    .checkout-status {
+      min-height: 22px;
+      margin-top: 14px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .checkout-status.error {
+      color: #ff9d9d;
+    }
+
+    .checkout-status.success {
+      color: #a9ffcf;
+    }
+
+        .checkout-box {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .checkout-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: radial-gradient(circle at center, black, transparent 82%);
+    }
+
+    .checkout-top,
+    .checkout-summary,
+    .checkout-methods,
+    .checkout-status {
+      position: relative;
+      z-index: 1;
+    }
+
+    .checkout-summary {
+      padding: 20px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(132, 140, 255, 0.18), transparent 46%),
+        rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(153, 160, 255, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .checkout-methods.payment-image-methods {
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .payment-image-methods .checkout-method {
+      height: 112px;
+      justify-content: center;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .checkout-method::after {
+      display: none;
+    }
+
+    .payment-image-btn.paypal {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(72, 112, 255, 0.22), transparent 44%),
+        rgba(255, 255, 255, 0.055);
+    }
+
+    .payment-image-btn.cashapp {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(36, 220, 95, 0.18), transparent 44%),
+        rgba(255, 255, 255, 0.055);
+    }
+    @media (max-width: 760px) {
+      .ticket-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .ticket-sidebar {
+        max-height: 180px;
+      }
+
+      .ticket-reply-form {
+        grid-template-columns: 52px 1fr;
+      }
+
+      .ticket-reply-form button#ticketReplySubmit {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .links {
+        display: none;
+      }
+
+      .hero,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 142px;
+      }
+
+      .hero-panel {
+        min-height: auto;
+      }
+
+      .display-preview {
+        width: 100%;
+      }
+
+      .cards,
+      .pricing {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        letter-spacing: -3px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 28px, 1180px);
+      }
+
+      nav {
+        width: calc(100% - 28px);
+        height: 68px;
+        top: 14px;
+        border-radius: 20px;
+      }
+
+      .brand-text {
+        font-size: 18px;
+      }
+
+      .nav-action {
+        display: none;
+      }
+
+      .hero-panel {
+        display: none;
+      }
+
+      h1 {
+        font-size: 48px;
+      }
+
+      .section {
+        padding: 58px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cart-modal" id="cartModal">
+    <div class="cart-panel">
+      <div class="cart-top">
+        <div>
+          <h2>Your Cart</h2>
+          <p>Review your selected access plan.</p>
+        </div>
+
+        <button class="cart-close" id="closeCart" type="button">
+          <span>×</span>
+        </button>
+      </div>
+
+      <div class="cart-items" id="cartItems">
+        <div class="cart-empty">Your cart is empty.</div>
+      </div>
+
+      <div class="cart-bottom">
+        <div class="cart-total-row">
+          <span>Total</span>
+          <strong id="cartTotal">$0</strong>
+        </div>
+
+        <button class="checkout-btn" id="checkoutBtn" type="button">
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="checkout-modal" id="checkoutModal">
+    <div class="checkout-box">
+      <div class="checkout-top">
+        <div>
+          <h2>Checkout</h2>
+          <p>Select a payment method to receive instructions.</p>
+        </div>
+
+        <button class="checkout-close" id="closeCheckout" type="button">
+          <span>×</span>
+        </button>
+      </div>
+
+  <div class="checkout-summary">
+    <div>
+      <span>Total Amount</span>
+      <small id="checkoutPlanName">Selected plan</small>
+    </div>
+
+    <strong id="checkoutTotal">$0</strong>
+  </div>
+
+  <div class="checkout-stats">
+    <div class="checkout-stat">
+      <strong>Manual</strong>
+      <span>Verification</span>
+    </div>
+
+    <div class="checkout-stat">
+      <strong>Ticket</strong>
+      <span>Created automatically</span>
+    </div>
+
+    <div class="checkout-stat">
+      <strong>Fast</strong>
+      <span>Admin response</span>
+    </div>
+  </div>
+
+  <div class="checkout-info-card">
+    <div class="checkout-info-dot"></div>
+    <p>
+      After choosing a method, we’ll create a private payment ticket with your order details and instructions.
+    </p>
+  </div>
+
+  <div class="checkout-methods payment-image-methods">
+    <button class="checkout-method payment-image-btn paypal" id="paypalCheckout" type="button" aria-label="Pay with PayPal">
+      <img src="./PayPal.png" alt="PayPal" />
+    </button>
+
+    <button class="checkout-method payment-image-btn cashapp" id="cashappCheckout" type="button" aria-label="Pay with Cash App">
+      <img src="./CashApp.png" alt="Cash App" />
+    </button>
+  </div>
+
+      <div class="checkout-status" id="checkoutStatus"></div>
+    </div>
+  </div>
+
+  <div class="ticket-modal" id="ticketModal">
+    <div class="ticket-box ticket-box-wide">
+      <div class="ticket-top">
+        <div>
+          <h2 id="ticketPanelTitle">Create Ticket</h2>
+          <p id="ticketPanelSubtitle">Create or view your support conversation.</p>
+        </div>
+
+        <button class="ticket-close" id="closeTicket" type="button">
+          <span>×</span>
+        </button>
+      </div>
+
+      <div class="ticket-layout">
+        <aside class="ticket-sidebar" id="ticketSidebar">
+          <div class="ticket-sidebar-title">Tickets</div>
+          <div class="ticket-list" id="ticketList">
+            <div class="ticket-empty-small">No tickets yet.</div>
+          </div>
+        </aside>
+
+        <section class="ticket-main">
+          <form class="ticket-form" id="ticketForm">
+            <div class="ticket-field">
+              <label for="ticketSubject">Subject</label>
+              <input id="ticketSubject" type="text" placeholder="What do you need help with?" required />
+            </div>
+
+            <div class="ticket-field">
+              <label for="ticketMessage">Message</label>
+              <textarea id="ticketMessage" placeholder="Describe the issue..." required></textarea>
+            </div>
+
+            <button class="ticket-submit" id="ticketSubmit" type="submit">
+              Submit Ticket
+            </button>
+          </form>
+
+          <div class="ticket-chat" id="ticketChat">
+            <div class="ticket-chat-empty">
+              Select a ticket to open the conversation.
+            </div>
+          </div>
+
+          <form class="ticket-reply-form" id="ticketReplyForm">
+            <button class="ticket-upload-btn" id="ticketUploadBtn" type="button">
+              +
+            </button>
+
+            <input class="ticket-file-input" id="ticketImageInput" type="file" accept="image/*" />
+
+            <input id="ticketReplyInput" type="text" placeholder="Type a message..." autocomplete="off" />
+
+            <button id="ticketReplySubmit" type="submit">Send</button>
+          </form>
+
+          <button class="ticket-close-current" id="closeCurrentTicket" type="button">
+            Close Ticket
+          </button>
+
+          <div class="ticket-message" id="ticketMessageStatus"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-modal" id="authModal">
+    <div class="auth-box">
+      <div class="auth-top">
+        <h2 id="authTitle">Login</h2>
+        <button class="auth-close" id="closeAuth" type="button">
+          <span>×</span>
+        </button>
+      </div>
+
+      <p class="auth-subtitle" id="authSubtitle">
+        Sign in to manage your XtMacros access.
+      </p>
+
+      <form class="auth-form" id="authForm">
+        <div class="auth-field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="auth-field">
+          <label for="authPassword">Password</label>
+          <input id="authPassword" type="password" placeholder="Enter your password" required minlength="6" />
+        </div>
+
+        <button class="auth-submit" type="submit" id="authSubmit">Login</button>
+      </form>
+
+      <div class="auth-message" id="authMessage"></div>
+
+      <p class="auth-note">
+        <span id="authSwitchText">Don’t have an account?</span>
+        <button class="auth-switch" id="authSwitch" type="button">Sign up</button>
+      </p>
+    </div>
+  </div>
+
+  <canvas id="network"></canvas>
+  <div class="noise"></div>
+
+  <nav>
+    <a class="brand" href="#">
+      <div class="brand-text">XtMacros</div>
+    </a>
+
+    <div class="links">
+      <a href="#plans">Plans</a>
+      <a href="#control">Control</a>
+     <a href="#faq">FAQ</a>
+    </div>
+
+    <div class="nav-right-actions">
+      <button class="cart-btn" id="openCart" type="button">
+        Cart
+        <span id="cartCount">0</span>
+      </button>
+
+      <button class="ticket-btn" id="openTicket" type="button">
+        Create Ticket
+      </button>
+
+      <div class="auth-actions">
+        <button class="login-btn" id="openLogin" type="button">Login</button>
+        <button class="signup-btn" id="openSignup" type="button">Sign Up</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <section class="hero">
+      <div>
+
+        <h1>
+          <span class="gradient-text">Automate smarter.</span>
+        </h1>
+
+        <p class="hero-copy">
+          XtMacros gives you clean controls, fast setup, and organized profiles.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#plans" class="btn primary">Start Now</a>
+          <a href="#control" class="btn ghost">View Details</a>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <strong>24/7</strong>
+            <span>Service</span>
+          </div>
+
+          <div class="stat">
+            <strong>Fast</strong>
+            <span>Setup</span>
+          </div>
+
+          <div class="stat">
+            <strong>100+</strong>
+            <span>users</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-panel">
+        <img src="./display.png" alt="XtMacros display preview" class="display-preview" />
+      </div>
+    </section>
+    
+<section class="section" id="plans">
+  <div class="section-head">
+    <h2>Choose your access.</h2>
+    <p>Start simple or unlock the full XtMacros experience.</p>
+  </div>
+
+      <div class="pricing">
+    <div class="price-card">
+      <h3>1 Week</h3>
+      <p>Short-term access to XtMacros features.</p>
+      <div class="price">$9<span>/we</span></div>
+      <button
+        class="btn ghost wide-btn add-cart-btn"
+        type="button"
+        data-name="1 Week"
+        data-price="9"
+        data-period="/we"
+      >
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="price-card featured">
+        <div class="price-title-row">
+          <h3>1 Month</h3>
+          <div class="recommended-badge">Recommended</div>
+        </div>
+      <p>Monthly access with more flexibility.</p>
+      <div class="price">$19<span>/mo</span></div>
+      <button
+        class="btn primary wide-btn add-cart-btn"
+        type="button"
+        data-name="1 Month"
+        data-price="19"
+        data-period="/mo"
+      >
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="price-card">
+      <h3>Lifetime</h3>
+      <p>One-time access with no need for monthly renewal.</p>
+      <div class="price">$45</div>
+      <button
+        class="btn ghost wide-btn add-cart-btn"
+        type="button"
+        data-name="Lifetime"
+        data-price="45"
+        data-period=""
+      >
+        Add to Cart
+      </button>
+    </div>
+  </div>
+
+  <div class="video-preview-wrap">
+    <video
+      class="video-preview-local"
+      src="./VideoPreview.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+    ></video>
+  </div>
+</section>
+
+    <section class="section" id="control">
+      <div class="section-head">
+        <h2>Simple tools with serious control.</h2>
+        <p></p>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-number">01</div>
+          <h3>Recoil Controller</h3>
+          <p>Adjust recoil settings with clean profiles and easy controls.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-number">02</div>
+          <h3>Pixel Trigger Bot</h3>
+          <p>Configure pixel-based trigger settings with quick access and simple adjustments.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-number">03</div>
+          <h3>Rapid Fire</h3>
+          <p>Set up rapid-fire profiles with organized controls and fast switching.</p>
+        </div>
+      </div>
+        </section>
+
+    <section class="section" id="faq">
+      <div class="section-head">
+        <h2>FAQ</h2>
+        <p>Quick answers to common questions.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <h3>Does R6 battle eye detect this macro?</h3>
+          <p>No, we make sure our macro is completely undetected by BattlEye. We even have a humanizer that randomizes your spray in-game.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>What do I do if I find a bug or glitch in the program?</h3>
+          <p>We advise you to create a ticket through our website and please show us what problem you're encountering.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>How do I install and set up the macro?</h3>
+          <p>After your purchase, all you need to do is download the client, copy and paste your license key into the program, and you're done.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    © 2026 XtMacros. All rights reserved.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "https://wmunvmkugsyqpyabqumk.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtdW52bWt1Z3N5cXB5YWJxdW1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjQ1MDQsImV4cCI6MjA5MzYwMDUwNH0.hab7EIR-M1cwucIzYKoWeFeE7dnwlRN0JvSmDino9lQ";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const PAYPAL_HANDLE = "only.hiroinnit@gmail.com";
+    const CASHAPP_HANDLE = "$PUT_YOUR_CASHAPP_HERE";
+
+    let authMode = "login";
+
+    let currentUser = null;
+    let currentProfile = null;
+    let currentTicket = null;
+    let ticketsCache = [];
+    let ticketRealtimeChannel = null;
+
+    const authModal = document.getElementById("authModal");
+    let openLogin = document.getElementById("openLogin");
+    let openSignup = document.getElementById("openSignup");
+    const closeAuth = document.getElementById("closeAuth");
+    const authTitle = document.getElementById("authTitle");
+    const authForm = document.getElementById("authForm");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const authSubmit = document.getElementById("authSubmit");
+    const authMessage = document.getElementById("authMessage");
+    const authSubtitle = document.getElementById("authSubtitle");
+    const authSwitchText = document.getElementById("authSwitchText");
+    const authSwitch = document.getElementById("authSwitch");
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      authMessage.textContent = "";
+
+      if (mode === "login") {
+        authTitle.textContent = "Login";
+        authSubtitle.textContent = "Sign in to manage your XtMacros access.";
+        authSubmit.textContent = "Login";
+        authSwitchText.textContent = "Don’t have an account?";
+        authSwitch.textContent = "Sign up";
+      } else {
+        authTitle.textContent = "Create Account";
+        authSubtitle.textContent = "Create your account and activate your license access.";
+        authSubmit.textContent = "Create Account";
+        authSwitchText.textContent = "Already have an account?";
+        authSwitch.textContent = "Login";
+      }
+    }
+
+    function openAuth(mode) {
+      setAuthMode(mode);
+      authModal.classList.add("active");
+    }
+
+    function closeAuthModal() {
+      authModal.classList.remove("active");
+      authForm.reset();
+      authMessage.textContent = "";
+    }
+
+    function bindAuthButtons() {
+      openLogin = document.getElementById("openLogin");
+      openSignup = document.getElementById("openSignup");
+
+      if (openLogin) {
+        openLogin.addEventListener("click", () => openAuth("login"));
+      }
+
+      if (openSignup) {
+        openSignup.addEventListener("click", () => openAuth("signup"));
+      }
+    }
+
+    bindAuthButtons();
+    closeAuth.addEventListener("click", closeAuthModal);
+
+    authModal.addEventListener("click", (e) => {
+      if (e.target === authModal) {
+        closeAuthModal();
+      }
+    });
+
+    authSwitch.addEventListener("click", () => {
+      setAuthMode(authMode === "login" ? "signup" : "login");
+    });
+
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+
+      authSubmit.disabled = true;
+      authSubmit.textContent = authMode === "login" ? "Logging in..." : "Creating...";
+      authMessage.className = "auth-message";
+      authMessage.textContent = "";
+
+      try {
+        if (authMode === "login") {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          authMessage.className = "auth-message success";
+          authMessage.textContent = "Logged in successfully.";
+
+          await updateAuthUI(data.user);
+          await loadCurrentProfile();
+          await loadTickets();
+          setTicketButtonLabel();
+
+          closeAuthModal();
+        } else {
+          const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password
+          });
+
+          if (error) {
+            throw error;
+          }
+
+          if (data.user && !data.session) {
+            authMessage.className = "auth-message success";
+            authMessage.textContent = "Account created. Check your email to confirm it.";
+          } else {
+            authMessage.className = "auth-message success";
+            authMessage.textContent = "Account created successfully.";
+
+            await updateAuthUI(data.user);
+            await loadCurrentProfile();
+            await loadTickets();
+            setTicketButtonLabel();
+
+            closeAuthModal();
+          }
+        }
+      } catch (error) {
+        console.error("Auth error:", error);
+        authMessage.className = "auth-message error";
+        authMessage.textContent = error.message || "Something went wrong.";
+      } finally {
+        authSubmit.disabled = false;
+        authSubmit.textContent = authMode === "login" ? "Login" : "Create Account";
+      }
+    });
+
+    async function updateAuthUI(user) {
+      const authActions = document.querySelector(".auth-actions");
+
+      if (!authActions) {
+        return;
+      }
+
+      if (!user) {
+        authActions.innerHTML = `
+          <button class="login-btn" id="openLogin" type="button">Login</button>
+          <button class="signup-btn" id="openSignup" type="button">Sign Up</button>
+        `;
+
+        bindAuthButtons();
+
+        currentUser = null;
+        currentProfile = null;
+        ticketsCache = [];
+
+        const ticketButton = document.getElementById("openTicket");
+
+        if (ticketButton) {
+          ticketButton.textContent = "Create Ticket";
+        }
+
+        return;
+      }
+
+      authActions.innerHTML = `
+        <button class="login-btn" type="button">${user.email}</button>
+        <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+      `;
+
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            await supabaseClient.auth.signOut();
+          } catch (error) {
+            console.error("Logout error:", error);
+          }
+
+          currentUser = null;
+          currentProfile = null;
+          currentTicket = null;
+          ticketsCache = [];
+
+          await updateAuthUI(null);
+          setTicketButtonLabel();
+
+          const ticketPopup = document.getElementById("ticketModal");
+          const cartPopup = document.getElementById("cartModal");
+
+          if (ticketPopup) {
+            ticketPopup.classList.remove("active");
+          }
+
+          if (cartPopup) {
+            cartPopup.classList.remove("active");
+          }
+        });
+      }
+    }
+    // Auth startup runs later, after ticket/cart variables are created.
+
+    const ticketModal = document.getElementById("ticketModal");
+    const ticketBox = document.querySelector("#ticketModal .ticket-box");
+    const openTicket = document.getElementById("openTicket");
+    const closeTicket = document.getElementById("closeTicket");
+    const ticketPanelTitle = document.getElementById("ticketPanelTitle");
+    const ticketPanelSubtitle = document.getElementById("ticketPanelSubtitle");
+    const ticketSidebar = document.getElementById("ticketSidebar");
+    const ticketList = document.getElementById("ticketList");
+    const ticketForm = document.getElementById("ticketForm");
+    const ticketSubject = document.getElementById("ticketSubject");
+    const ticketMessage = document.getElementById("ticketMessage");
+    const ticketSubmit = document.getElementById("ticketSubmit");
+    const ticketChat = document.getElementById("ticketChat");
+    const ticketReplyForm = document.getElementById("ticketReplyForm");
+    const ticketReplyInput = document.getElementById("ticketReplyInput");
+    const ticketReplySubmit = document.getElementById("ticketReplySubmit");
+    const ticketUploadBtn = document.getElementById("ticketUploadBtn");
+    const ticketImageInput = document.getElementById("ticketImageInput");
+    const closeCurrentTicket = document.getElementById("closeCurrentTicket");
+    const ticketMessageStatus = document.getElementById("ticketMessageStatus");
+
+    async function loadCurrentProfile() {
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+      if (userError) {
+        console.error("User load error:", userError);
+      }
+
+      currentUser = userData.user || null;
+
+      if (!currentUser) {
+        currentProfile = null;
+        return null;
+      }
+
+      const { data: profile, error: profileError } = await supabaseClient
+        .from("profiles")
+        .select("id, email, role")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("Profile load error:", profileError);
+      }
+
+      currentProfile = profile || {
+        id: currentUser.id,
+        email: currentUser.email,
+        role: "user"
+      };
+
+      console.log("CURRENT PROFILE:", currentProfile);
+
+      return currentProfile;
+    }
+
+    function isAdminUser() {
+      return currentProfile && currentProfile.role === "admin";
+    }
+
+    function setTicketStatus(message, type = "") {
+      ticketMessageStatus.className = type ? `ticket-message ${type}` : "ticket-message";
+      ticketMessageStatus.textContent = message;
+    }
+
+    function setTicketButtonLabel() {
+      const ticketButton = document.getElementById("openTicket");
+
+      if (!ticketButton) {
+        return;
+      }
+
+      if (!currentUser) {
+        ticketButton.textContent = "Create Ticket";
+        return;
+      }
+
+      if (isAdminUser()) {
+        ticketButton.textContent = "View Tickets";
+        return;
+      }
+
+      const openTicketExists = ticketsCache.some((ticket) => ticket.status === "open");
+
+      ticketButton.textContent = openTicketExists ? "View Ticket" : "Create Ticket";
+    }
+
+    function resetTicketPanel() {
+      currentTicket = null;
+      ticketForm.reset();
+      ticketChat.innerHTML = `<div class="ticket-chat-empty">Select a ticket to open the conversation.</div>`;
+      ticketChat.classList.remove("active");
+      ticketReplyForm.classList.remove("active");
+      closeCurrentTicket.classList.remove("active");
+      setTicketStatus("");
+    }
+
+    async function openTicketModal() {
+      await loadCurrentProfile();
+
+      if (!currentUser) {
+        openAuth("login");
+        return;
+      }
+
+      ticketModal.classList.add("active");
+      await loadTickets();
+
+      if (isAdminUser()) {
+        ticketBox.classList.remove("ticket-box-user");
+
+        ticketPanelTitle.textContent = "View Tickets";
+        ticketPanelSubtitle.textContent = "Open support conversations and reply to users.";
+        ticketSidebar.style.display = "grid";
+        ticketForm.style.display = "none";
+        resetTicketPanel();
+        return;
+      }
+
+      const openUserTicket = ticketsCache.find((ticket) => ticket.status === "open");
+
+      if (openUserTicket) {
+        ticketBox.classList.add("ticket-box-user");
+
+        ticketPanelTitle.textContent = "View Ticket";
+        ticketPanelSubtitle.textContent = "Talk with support about your active ticket.";
+        ticketSidebar.style.display = "none";
+        ticketForm.style.display = "none";
+        await openTicketConversation(openUserTicket);
+      } else {
+        ticketBox.classList.add("ticket-box-user");
+
+        ticketPanelTitle.textContent = "Create Ticket";
+        ticketPanelSubtitle.textContent = "Send a support request to the admin team.";
+        ticketSidebar.style.display = "none";
+        ticketForm.style.display = "grid";
+        resetTicketPanel();
+      }
+    }
+
+    function closeTicketModal() {
+      ticketModal.classList.remove("active");
+      ticketForm.reset();
+      setTicketStatus("");
+    }
+
+    async function loadTickets() {
+      if (!currentUser) {
+        ticketsCache = [];
+        renderTicketList();
+        setTicketButtonLabel();
+        return;
+      }
+
+      let query = supabaseClient
+        .from("tickets")
+        .select("id, user_id, subject, message, status, created_at")
+        .order("created_at", { ascending: true });
+
+      if (!isAdminUser()) {
+        query = query.eq("user_id", currentUser.id);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        setTicketStatus(error.message, "error");
+        return;
+      }
+
+      ticketsCache = data || [];
+      renderTicketList();
+      setTicketButtonLabel();
+    }
+
+    function renderTicketList() {
+      ticketList.innerHTML = "";
+
+      if (!ticketsCache.length) {
+        ticketList.innerHTML = `<div class="ticket-empty-small">No tickets yet.</div>`;
+        return;
+      }
+
+      ticketsCache.forEach((ticket, index) => {
+        const button = document.createElement("button");
+        button.className = "ticket-list-btn";
+        button.type = "button";
+        button.dataset.ticketId = ticket.id;
+
+        if (currentTicket && currentTicket.id === ticket.id) {
+          button.classList.add("active");
+        }
+
+        button.innerHTML = `
+          <strong>ticket-${String(index + 1).padStart(2, "0")}</strong>
+          <span>${ticket.status} · ${ticket.subject}</span>
+        `;
+
+        button.addEventListener("click", () => {
+          openTicketConversation(ticket);
+        });
+
+        ticketList.appendChild(button);
+      });
+    }
+
+    async function openTicketConversation(ticket) {
+      currentTicket = ticket;
+      renderTicketList();
+
+      ticketForm.style.display = "none";
+      ticketChat.classList.add("active");
+      ticketReplyForm.classList.toggle("active", ticket.status === "open");
+      closeCurrentTicket.classList.toggle("active", ticket.status === "open");
+
+      ticketPanelTitle.textContent = isAdminUser() ? "View Tickets" : "View Ticket";
+      ticketPanelSubtitle.textContent = `${ticket.subject} · ${ticket.status}`;
+
+      await loadTicketMessages(ticket.id);
+      subscribeToTicketMessages(ticket.id);
+    }
+
+    async function loadTicketMessages(ticketId) {
+      ticketChat.innerHTML = "";
+
+      const { data, error } = await supabaseClient
+        .from("ticket_messages")
+        .select("id, ticket_id, sender_id, sender_type, message, image_url, created_at")
+        .eq("ticket_id", ticketId)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        ticketChat.innerHTML = `<div class="ticket-chat-empty">${error.message}</div>`;
+        return;
+      }
+
+      if (!data || !data.length) {
+        ticketChat.innerHTML = `<div class="ticket-chat-empty">No messages yet.</div>`;
+        return;
+      }
+
+      data.forEach(renderTicketMessage);
+      ticketChat.scrollTop = ticketChat.scrollHeight;
+    }
+
+    function renderTicketMessage(messageRow) {
+      const messageEl = document.createElement("div");
+      const isBot = messageRow.sender_type === "bot";
+      const mine = !isBot && currentUser && messageRow.sender_id === currentUser.id;
+
+      messageEl.className = isBot ? "ticket-bubble bot" : mine ? "ticket-bubble mine" : "ticket-bubble admin";
+
+      const senderLabel = isBot ? "XtMacros Bot" : mine ? "You" : "Support";
+      const messageText = messageRow.message ? `<p>${formatTicketMessage(messageRow.message)}</p>` : "";
+      const imageHtml = messageRow.image_url
+        ? `<img class="ticket-image" src="${escapeHtml(messageRow.image_url)}" alt="Ticket image" onclick="window.open('${escapeHtml(messageRow.image_url)}', '_blank')" />`
+        : "";
+
+      messageEl.innerHTML = `
+        ${imageHtml}
+        ${messageText}
+        <span>${senderLabel} · ${new Date(messageRow.created_at).toLocaleString()}</span>
+      `;
+
+      ticketChat.appendChild(messageEl);
+      ticketChat.scrollTop = ticketChat.scrollHeight;
+    }
+
+    function formatTicketMessage(value) {
+      return escapeHtml(value).replaceAll("\n", "<br>");
+    }
+
+    function subscribeToTicketMessages(ticketId) {
+      if (ticketRealtimeChannel) {
+        supabaseClient.removeChannel(ticketRealtimeChannel);
+      }
+
+      ticketRealtimeChannel = supabaseClient
+        .channel(`ticket_messages_${ticketId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "ticket_messages",
+            filter: `ticket_id=eq.${ticketId}`
+          },
+          (payload) => {
+            if (!currentTicket || payload.new.ticket_id !== currentTicket.id) {
+              return;
+            }
+
+            renderTicketMessage(payload.new);
+          }
+        )
+        .subscribe();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    openTicket.addEventListener("click", openTicketModal);
+    closeTicket.addEventListener("click", closeTicketModal);
+
+    ticketModal.addEventListener("click", (e) => {
+      if (e.target === ticketModal) {
+        closeTicketModal();
+      }
+    });
+
+    ticketForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      ticketSubmit.disabled = true;
+      ticketSubmit.textContent = "Submitting...";
+
+      try {
+        await loadCurrentProfile();
+
+        if (!currentUser) {
+          throw new Error("Please login before creating a ticket.");
+        }
+
+        const subject = ticketSubject.value.trim();
+        const message = ticketMessage.value.trim();
+
+        const { data: ticketData, error: ticketError } = await supabaseClient
+          .from("tickets")
+          .insert({
+            user_id: currentUser.id,
+            subject,
+            message
+          })
+          .select()
+          .single();
+
+        if (ticketError) {
+          throw ticketError;
+        }
+
+        const { error: messageError } = await supabaseClient
+          .from("ticket_messages")
+          .insert({
+            ticket_id: ticketData.id,
+            sender_id: currentUser.id,
+            message
+          });
+
+        if (messageError) {
+          throw messageError;
+        }
+
+        setTicketStatus("Ticket created successfully.", "success");
+        await loadTickets();
+        await openTicketConversation(ticketData);
+      } catch (error) {
+        setTicketStatus(error.message || "Could not create ticket.", "error");
+      }
+
+      ticketSubmit.disabled = false;
+      ticketSubmit.textContent = "Submit Ticket";
+    });
+
+    ticketReplyForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!currentTicket) {
+        return;
+      }
+
+      const message = ticketReplyInput.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      ticketReplySubmit.disabled = true;
+
+      try {
+        const { error } = await supabaseClient
+          .from("ticket_messages")
+          .insert({
+            ticket_id: currentTicket.id,
+            sender_id: currentUser.id,
+            sender_type: "user",
+            message
+          });
+
+        if (error) {
+          throw error;
+        }
+
+        ticketReplyInput.value = "";
+      } catch (error) {
+        setTicketStatus(error.message || "Could not send message.", "error");
+      }
+
+      ticketReplySubmit.disabled = false;
+    });
+
+    ticketUploadBtn.addEventListener("click", () => {
+      ticketImageInput.click();
+    });
+
+    ticketImageInput.addEventListener("change", async () => {
+      if (!currentTicket || !ticketImageInput.files.length) {
+        return;
+      }
+
+      const file = ticketImageInput.files[0];
+
+      if (!file.type.startsWith("image/")) {
+        setTicketStatus("Please choose an image file.", "error");
+        ticketImageInput.value = "";
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setTicketStatus("Image must be under 5 MB.", "error");
+        ticketImageInput.value = "";
+        return;
+      }
+
+      ticketUploadBtn.disabled = true;
+      ticketUploadBtn.textContent = "...";
+
+      try {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${currentTicket.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from("ticket-images")
+          .upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: false
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: publicData } = supabaseClient.storage
+          .from("ticket-images")
+          .getPublicUrl(fileName);
+
+        const { error: messageError } = await supabaseClient
+          .from("ticket_messages")
+          .insert({
+            ticket_id: currentTicket.id,
+            sender_id: currentUser.id,
+            sender_type: "user",
+            message: "",
+            image_url: publicData.publicUrl
+          });
+
+        if (messageError) {
+          throw messageError;
+        }
+
+        ticketImageInput.value = "";
+        setTicketStatus("");
+      } catch (error) {
+        console.error("Image upload error:", error);
+        setTicketStatus(error.message || "Could not upload image.", "error");
+      }
+
+      ticketUploadBtn.disabled = false;
+      ticketUploadBtn.textContent = "+";
+    });
+
+    closeCurrentTicket.addEventListener("click", async () => {
+      if (!currentTicket) {
+        return;
+      }
+
+      const confirmed = confirm("Close this ticket?");
+
+      if (!confirmed) {
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from("tickets")
+        .update({ status: "closed" })
+        .eq("id", currentTicket.id);
+
+      if (error) {
+        setTicketStatus(error.message, "error");
+        return;
+      }
+
+      currentTicket.status = "closed";
+      ticketReplyForm.classList.remove("active");
+      closeCurrentTicket.classList.remove("active");
+      setTicketStatus("Ticket closed.", "success");
+      await loadTickets();
+      renderTicketList();
+    });
+
+    async function refreshAuthAndTickets() {
+      try {
+        const { data } = await supabaseClient.auth.getUser();
+
+        if (data.user) {
+          await updateAuthUI(data.user);
+          await loadCurrentProfile();
+          await loadTickets();
+          setTicketButtonLabel();
+        } else {
+          currentUser = null;
+          currentProfile = null;
+          currentTicket = null;
+          ticketsCache = [];
+
+          await updateAuthUI(null);
+          setTicketButtonLabel();
+        }
+      } catch (error) {
+        console.error("Auth refresh error:", error);
+      }
+    }
+
+    refreshAuthAndTickets();
+
+    supabaseClient.auth.onAuthStateChange(() => {
+      refreshAuthAndTickets();
+    });
+
+    const cartModal = document.getElementById("cartModal");
+    const openCart = document.getElementById("openCart");
+    const closeCart = document.getElementById("closeCart");
+    const cartItems = document.getElementById("cartItems");
+    const cartCount = document.getElementById("cartCount");
+    const cartTotal = document.getElementById("cartTotal");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    const checkoutModal = document.getElementById("checkoutModal");
+    const closeCheckout = document.getElementById("closeCheckout");
+    const checkoutTotal = document.getElementById("checkoutTotal");
+    const checkoutPlanName = document.getElementById("checkoutPlanName");
+    const checkoutStatus = document.getElementById("checkoutStatus");
+    const paypalCheckout = document.getElementById("paypalCheckout");
+    const cashappCheckout = document.getElementById("cashappCheckout");
+    const addCartButtons = document.querySelectorAll(".add-cart-btn");
+
+    let cart = JSON.parse(localStorage.getItem("xtmacros_cart")) || [];
+
+    function saveCart() {
+      localStorage.setItem("xtmacros_cart", JSON.stringify(cart));
+    }
+
+    function openCartModal() {
+      cartModal.classList.add("active");
+    }
+
+    function closeCartModal() {
+      cartModal.classList.remove("active");
+    }
+
+    function renderCart() {
+      cartItems.innerHTML = "";
+
+      if (cart.length === 0) {
+        cartItems.innerHTML = `<div class="cart-empty">Your cart is empty.</div>`;
+        cartCount.textContent = "0";
+        cartTotal.textContent = "$0";
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const cartItem = document.createElement("div");
+        cartItem.className = "cart-item";
+
+        cartItem.innerHTML = `
+          <div>
+            <h3>${item.name}</h3>
+            <p>$${item.price}${item.period}</p>
+          </div>
+
+          <button class="cart-remove" type="button" data-index="${index}">×</button>
+        `;
+
+        cartItems.appendChild(cartItem);
+      });
+
+      const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+
+      cartCount.textContent = cart.length;
+      cartTotal.textContent = `$${total}`;
+
+      document.querySelectorAll(".cart-remove").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.index);
+          cart.splice(index, 1);
+          saveCart();
+          renderCart();
+        });
+      });
+    }
+
+    addCartButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = {
+          name: button.dataset.name,
+          price: Number(button.dataset.price),
+          period: button.dataset.period
+        };
+
+        cart = [item];
+        saveCart();
+        renderCart();
+        openCartModal();
+      });
+    });
+
+    openCart.addEventListener("click", openCartModal);
+    closeCart.addEventListener("click", closeCartModal);
+
+    cartModal.addEventListener("click", (e) => {
+      if (e.target === cartModal) {
+        closeCartModal();
+      }
+    });
+
+    function getCartTotal() {
+      return cart.reduce((sum, item) => sum + Number(item.price), 0);
+    }
+
+    function openCheckoutModal() {
+      if (cart.length === 0) {
+        return;
+      }
+
+      closeCartModal();
+
+      checkoutStatus.className = "checkout-status";
+      checkoutStatus.textContent = "";
+      checkoutTotal.textContent = `$${getCartTotal()}`;
+      checkoutPlanName.textContent = cart.map((item) => item.name).join(", ");
+      checkoutModal.classList.add("active");
+    }
+
+    function closeCheckoutModal() {
+      checkoutModal.classList.remove("active");
+      checkoutStatus.className = "checkout-status";
+      checkoutStatus.textContent = "";
+    }
+
+    checkoutBtn.addEventListener("click", openCheckoutModal);
+    closeCheckout.addEventListener("click", closeCheckoutModal);
+
+    checkoutModal.addEventListener("click", (e) => {
+      if (e.target === checkoutModal) {
+        closeCheckoutModal();
+      }
+    });
+
+    paypalCheckout.addEventListener("click", () => {
+      createPaymentTicket("PayPal");
+    });
+
+    cashappCheckout.addEventListener("click", () => {
+      createPaymentTicket("Cash App");
+    });
+
+        async function createPaymentTicket(method) {
+      checkoutStatus.className = "checkout-status";
+      checkoutStatus.textContent = "Creating payment ticket...";
+
+      try {
+        await loadCurrentProfile();
+
+        if (!currentUser) {
+          closeCheckoutModal();
+          openAuth("login");
+          return;
+        }
+
+        if (cart.length === 0) {
+          throw new Error("Your cart is empty.");
+        }
+
+        const item = cart[0];
+        const total = getCartTotal();
+        const paymentTarget = method === "PayPal" ? PAYPAL_HANDLE : CASHAPP_HANDLE;
+
+        if (!paymentTarget || paymentTarget.includes("PUT_YOUR")) {
+          throw new Error(`${method} payment handle is not set yet.`);
+        }
+
+        const subject = `Payment - ${item.name}`;
+        const instructions = buildPaymentInstructions(method, item, total, paymentTarget);
+
+        const { data: ticketData, error: ticketError } = await supabaseClient
+          .from("tickets")
+          .insert({
+            user_id: currentUser.id,
+            subject,
+            message: `Checkout started for ${item.name} - $${total}`
+          })
+          .select()
+          .single();
+
+        if (ticketError) {
+          throw ticketError;
+        }
+
+        const { error: userMessageError } = await supabaseClient
+          .from("ticket_messages")
+          .insert({
+            ticket_id: ticketData.id,
+            sender_id: currentUser.id,
+            message: `I want to purchase ${item.name} for $${total} using ${method}.`
+          });
+
+        if (userMessageError) {
+          throw userMessageError;
+        }
+
+        const { error: instructionError } = await supabaseClient
+          .from("ticket_messages")
+          .insert({
+            ticket_id: ticketData.id,
+            sender_id: currentUser.id,
+            sender_type: "bot",
+            message: instructions
+          });
+
+        if (instructionError) {
+          throw instructionError;
+        }
+
+        cart = [];
+        saveCart();
+        renderCart();
+
+        checkoutStatus.className = "checkout-status success";
+        checkoutStatus.textContent = "Ticket created. Opening your ticket...";
+
+        await loadTickets();
+
+        setTimeout(async () => {
+          closeCheckoutModal();
+          ticketModal.classList.add("active");
+          ticketBox.classList.add("ticket-box-user");
+          ticketSidebar.style.display = "none";
+          ticketForm.style.display = "none";
+          await openTicketConversation(ticketData);
+        }, 700);
+      } catch (error) {
+        console.error("Checkout ticket error:", error);
+        checkoutStatus.className = "checkout-status error";
+        checkoutStatus.textContent = error.message || "Could not create payment ticket.";
+      }
+    }
+
+    function buildPaymentInstructions(method, item, total, paymentTarget) {
+      const paymentNote = `XtMacros ${item.name}`;
+      const orderId = `XM-${Date.now().toString().slice(-6)}`;
+
+      if (method === "PayPal") {
+        return `Payment Instructions
+
+Order ID: ${orderId}
+Plan: ${item.name}
+Total: $${total}
+Payment Method: PayPal
+
+Send payment to:
+${paymentTarget}
+
+Payment note:
+${paymentNote}
+
+After payment:
+1. Send the payment.
+2. Reply in this ticket with a screenshot or confirmation.
+3. Wait for an admin to verify your payment.
+4. Your access will be handled after verification.
+
+Important:
+Use the exact payment note above so we can match your payment to your order.`;
+      }
+
+      return `Payment Instructions
+
+Order ID: ${orderId}
+Plan: ${item.name}
+Total: $${total}
+Payment Method: Cash App
+
+Send payment to:
+${paymentTarget}
+
+Payment note:
+${paymentNote}
+
+After payment:
+1. Send the payment.
+2. Reply in this ticket with a screenshot or confirmation.
+3. Wait for an admin to verify your payment.
+4. Your access will be handled after verification.
+
+Important:
+Use the exact payment note above so we can match your payment to your order.`;
+    }
+
+    renderCart();
+
+    const canvas = document.getElementById("network");
+    const ctx = canvas.getContext("2d");
+
+    let w = 0;
+    let h = 0;
+    let points = [];
+    let mouse = { x: -9999, y: -9999 };
+
+    function resize() {
+      w = canvas.width = window.innerWidth * window.devicePixelRatio;
+      h = canvas.height = window.innerHeight * window.devicePixelRatio;
+
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+
+      const count = Math.min(78, Math.max(38, Math.floor((window.innerWidth * window.innerHeight) / 17000)));
+
+      points = Array.from({ length: count }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: (Math.random() - 0.5) * 0.16,
+        r: Math.random() * 1.4 + 1.1
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < -20) p.x = window.innerWidth + 20;
+        if (p.x > window.innerWidth + 20) p.x = -20;
+        if (p.y < -20) p.y = window.innerHeight + 20;
+        if (p.y > window.innerHeight + 20) p.y = -20;
+
+        for (let j = i + 1; j < points.length; j++) {
+          const q = points[j];
+          const dx = p.x - q.x;
+          const dy = p.y - q.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+
+          if (d < 138) {
+            const alpha = (1 - d / 138) * 0.24;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = `rgba(105, 112, 170, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+
+        const mdx = p.x - mouse.x;
+        const mdy = p.y - mouse.y;
+        const md = Math.sqrt(mdx * mdx + mdy * mdy);
+
+        if (md < 180) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(150, 156, 255, ${(1 - md / 180) * 0.22})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(155, 161, 232, 0.72)";
+        ctx.shadowColor = "rgba(130, 138, 255, 0.55)";
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener("resize", resize);
+
+    window.addEventListener("mousemove", (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener("mouseleave", () => {
+      mouse.x = -9999;
+      mouse.y = -9999;
+    });
+
+    resize();
+    draw();
+  </script>
+</body>
+</html>
